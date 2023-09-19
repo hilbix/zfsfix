@@ -87,12 +87,17 @@ revive2()
   (*)		OOPS "$usbpath" target state is "$now";;
   esac
 
+  o dmsetup remove "$3"
+
   vg="${3//--/\/}"
   vg="${vg%%-*}"
   vg="${vg//\//-}"
   o vgchange -ay "$vg"
 
-  STDOUT zpool online "$POOL" "/dev/mapper/$3"	# reactivate it on ZFS
+  o diskus -read -to 1G "/dev/mapper/$3"
+
+  o zpool online "$POOL" "/dev/mapper/$3"
+  o zpool clear "$POOL" "/dev/mapper/$3"
 }
 
 declare -A DEV
@@ -118,9 +123,4 @@ do
 	printf '%q %q\n' "$a" "${DEV["$a"]}"
 	revive "$a"
 done
-
-read
-
-# 0 .. 1 .. /sys/bus/usb/devices/1-4.6/authorized
-
 
