@@ -55,15 +55,11 @@ revive()
 	(offline)	;;
 	(*)		OOPS unknown state of "$1": "$state";;
 	esac
-	revive2 "$1" "$MAJMIN" "$name" "$state" "$fullpath"
+	revivevdev "$1" "$MAJMIN" "$name" "$state" "$fullpath"
   done 6< <(dmsetup table)
 }
 
-#  ls -al "/sys/dev/block/$MAJMIN/"
-#  STDERR $MAJMIN
-#  echo zpool offline "$POOL" "$1"
-
-revive2()
+revivevdev()
 {
   STDERR = revive "$@"
 
@@ -76,28 +72,29 @@ revive2()
 
   o test -f "$auth"
 
-  echo 0 > "$auth"
+  echo 0 > "$auth"				# deactivate USB device
   sleep 1
-  echo 1 > "$auth"
+  echo 1 > "$auth"				# reactivate USB device
   sleep 10
 
+  # The device shoudl be there again
   ov now cat "$usbpath/${usbpath##*/}":*/host*/target*/*/state
   case "$now" in
   (running)	;;
   (*)		OOPS "$usbpath" target state is "$now";;
   esac
 
-  o dmsetup remove "$3"
+  o dmsetup remove "$3"				# remove old entry, fails if still in use
 
   vg="${3//--/\/}"
   vg="${vg%%-*}"
   vg="${vg//\//-}"
-  o vgchange -ay "$vg"
+  o vgchange -ay "$vg"				# bing back LV
 
-  o diskus -read -to 1G "/dev/mapper/$3"
+  o diskus -read -to 1G "/dev/mapper/$3"	# check LV really available again
 
-  o zpool online "$POOL" "/dev/mapper/$3"
-  o zpool clear "$POOL" "/dev/mapper/$3"
+  o zpool online "$POOL" "/dev/mapper/$3"	# online the device
+  o zpool clear "$POOL" "/dev/mapper/$3"	# remove FAULTED state if any
 }
 
 declare -A DEV
