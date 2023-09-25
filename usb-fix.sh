@@ -21,12 +21,12 @@
 #
 # Then following needs to be done:
 #
-# - Offline device on ZFS, so the device becomes free
+# - Offline VDEV on ZFS, so the device becomes free
 # - reset the USB device (using USB deactivating sequence)
 # - revive the VG
-# - online the device on ZFS
+# - online the VDEV on ZFS
 #
-# I DO NOT RECOMMEND TO RUN THIS HERE FOR OTHER TYPE OF DEVICES
+# I DO NOT RECOMMEND TO RUN THIS HERE FOR OTHER TYPE OF VDEVs
 # which need resilvering.  However it might work to revice USB mirrors this way.
 #
 # Rationale:
@@ -42,9 +42,12 @@
 # Also note that you can add and remove ARC devices for different workloads without problem.
 # So for example if you have a special nightly process which reads lots of data,
 # you can online some ARC for this, run the job, and offline it afterwards.
-# And with USB you can attach tons of such cheap devices
-# (it is only $50 per TiB today).
+# And with USB you can attach tons of such cheap devices (it is only $50 per TiB today).
 # ZFS is very flexible in this respect.
+#
+# This Works is placed under the terms of the Copyright Less License,
+# see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+
 
 POOL=zfs
 
